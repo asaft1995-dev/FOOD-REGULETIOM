@@ -207,48 +207,5 @@
     </df-messenger>
   </main>
 </body>
-/* הוסף את זה ל-CSS שלך (אפשר ממש בסוף) */
-
-/* אנימציית כניסה רכה לכל “הכרטיס” של הצ’אט */
-.chat-container {
-  animation: enter 420ms cubic-bezier(.2,.9,.2,1) both;
-  will-change: transform, opacity;
-}
-
-@keyframes enter {
-  from {
-    transform: translateY(12px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-/* אפקט hover עדין ל-header */
-.app-header {
-  transition: box-shadow 220ms ease, background-color 220ms ease;
-}
-
-.app-header:hover {
-  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.90);
-}
-
-/* שיפור תחושת אינטרקטיביות: הקטנה קלה בלחיצה (tap) */
-.chat-container:active {
-  transform: translateY(1px) scale(0.998);
-}
-
-/* נגישות: אם משתמש ביקש להפחית אנימציות – מכבים */
-@media (prefers-reduced-motion: reduce) {
-  .chat-container {
-    animation: none !important;
-  }
-  .app-header {
-    transition: none !important;
-  }
-}
 
 </html>

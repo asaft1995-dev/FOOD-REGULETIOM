@@ -1,3 +1,4 @@
+html
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 
@@ -6,15 +7,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ComplyFlow - עוזר רגולציה חכם</title>
 
-  <!-- Fonts (Idea #1: Better Hebrew typography) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
     rel="stylesheet" />
-
-  <!-- Dialogflow Messenger -->
-  <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
 
   <style>
     :root {
@@ -24,188 +21,206 @@
       --muted: #6b7280;
       --brand: #1a73e8;
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-      --shadow-soft: 0 6px 18px rgba(0, 0, 0, 0.10);
       --radius: 18px;
+      --msg-user: #e8f0fe;
+      --msg-bot: #ffffff;
     }
 
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: "Heebo", "Inter", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-      color: var(--text);
-    }
+    html, body { margin: 0; padding: 0; height: 100%; font-family: "Heebo", "Inter", sans-serif; color: var(--text); }
+    body { display: flex; flex-direction: column; background: #f3f4f6; }
 
-    body {
-      display: flex;
-      flex-direction: column;
-    }
+    /* רקעים */
+    body::before { content: ""; position: fixed; inset: 0; background-image: url('back_img.jpeg'); background-size: cover; background-position: center; filter: blur(6px); opacity: 0.92; z-index: -2; }
+    body::after { content: ""; position: fixed; inset: 0; background: radial-gradient(1200px 600px at 80% 10%, rgba(26, 115, 232, 0.18), transparent 55%), linear-gradient(to bottom, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.35)); z-index: -1; }
 
-    /* --- Background (Idea #2: Cleaner glass + gradient layers) --- */
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
+    /* Header */
+    .app-header { height: 92px; padding: 0 28px; display: flex; align-items: center; gap: 16px; background: var(--glass-strong); backdrop-filter: blur(10px); box-shadow: var(--shadow); border-bottom: 1px solid rgba(255, 255, 255, 0.35); z-index: 10; }
+    .logo-img { height: 64px; width: auto; }
+    .header-text { margin-right: auto; line-height: 1.1; }
+    .header-title { font-size: 1.35rem; font-weight: 800; }
+    .header-sub { font-size: 0.95rem; font-weight: 500; color: var(--muted); }
 
-      /* Make sure back_img.jpeg exists next to this HTML file */
-      background-image: url('back_img.jpeg');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
+    /* Chat Container */
+    .chat-wrapper { flex: 1; max-width: 1040px; width: calc(100% - 32px); margin: 18px auto 22px; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1px solid rgba(255, 255, 255, 0.35); background: var(--glass-bg); backdrop-filter: blur(12px); display: flex; flex-direction: column; }
+    
+    #chat-history { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+    
+    .message { max-width: 80%; padding: 12px 16px; border-radius: 12px; line-height: 1.5; font-size: 0.95rem; position: relative; word-wrap: break-word; }
+    .message.bot { align-self: flex-start; background: var(--msg-bot); border-bottom-right-radius: 2px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .message.user { align-self: flex-end; background: var(--msg-user); color: #174ea6; border-bottom-left-radius: 2px; }
+    .message img { max-width: 100%; border-radius: 8px; margin-top: 8px; display: block; }
 
-      filter: blur(6px) saturate(1.15) contrast(1.05);
-      opacity: 0.92;
-      z-index: -2;
-    }
+    /* Input Area */
+    .input-area { padding: 16px; background: rgba(255, 255, 255, 0.9); border-top: 1px solid rgba(0,0,0,0.05); display: flex; gap: 10px; align-items: flex-end; }
+    
+    textarea { flex: 1; border: 1px solid #ddd; border-radius: 24px; padding: 12px 16px; font-family: inherit; font-size: 1rem; resize: none; height: 24px; max-height: 120px; outline: none; transition: border-color 0.2s; }
+    textarea:focus { border-color: var(--brand); }
 
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(1200px 600px at 80% 10%, rgba(26, 115, 232, 0.18), transparent 55%),
-        radial-gradient(900px 500px at 10% 80%, rgba(17, 24, 39, 0.18), transparent 60%),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.35));
-      z-index: -1;
-    }
+    .icon-btn { background: none; border: none; cursor: pointer; padding: 8px; color: var(--muted); transition: color 0.2s; }
+    .icon-btn:hover { color: var(--brand); }
+    .send-btn { background: var(--brand); color: white; border: none; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+    .send-btn:hover { background: #155db5; }
 
-    /* --- Header --- */
-    .app-header {
-      height: 92px;
-      padding: 0 28px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
+    /* Preview Image */
+    #image-preview-container { display: none; padding: 0 20px 10px; }
+    .preview-wrapper { display: inline-block; position: relative; }
+    #image-preview { height: 60px; border-radius: 8px; border: 2px solid var(--brand); }
+    .remove-img { position: absolute; top: -8px; left: -8px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 18px; font-size: 12px; cursor: pointer; border: 1px solid white; }
 
-      background: var(--glass-strong);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+    /* Typing Indicator */
+    .typing { display: none; align-self: flex-start; color: var(--muted); font-size: 0.8rem; margin-left: 10px; margin-bottom: 10px; }
 
-      box-shadow: var(--shadow-soft);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.35);
-      position: relative;
-      z-index: 10;
-    }
-
-    .logo-container {
-      display: flex;
-      align-items: center;
-    }
-
-    .logo-img {
-      height: 64px;
-      width: auto;
-    }
-
-    .header-text {
-      margin-right: auto;
-      line-height: 1.1;
-    }
-
-    .header-title {
-      font-size: 1.35rem;
-      font-weight: 800;
-      letter-spacing: 0.2px;
-    }
-
-    .header-sub {
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: var(--muted);
-      margin-top: 3px;
-    }
-
-    /* --- Chat Container (glass card) --- */
-    .chat-container {
-      flex: 1;
-      max-width: 1040px;
-      width: calc(100% - 32px);
-      margin: 18px auto 22px;
-
-      border-radius: var(--radius);
-      overflow: hidden;
-
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(255, 255, 255, 0.35);
-
-      background: var(--glass-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-
-    /* Dialogflow Messenger theme vars */
-    df-messenger {
-      z-index: 1;
-      --df-messenger-chat-window-height: 100%;
-      --df-messenger-chat-window-width: 100%;
-
-      --df-messenger-chat-background: rgba(255, 255, 255, 0.30);
-      --df-messenger-message-user-background: rgba(26, 115, 232, 0.10);
-      --df-messenger-message-user-font-color: #0b1220;
-      --df-messenger-message-bot-background: rgba(255, 255, 255, 0.82);
-
-      --df-messenger-send-icon: var(--brand);
-      --df-messenger-button-titlebar-color: var(--brand);
-
-      --df-messenger-input-box-background: rgba(255, 255, 255, 0.92);
-      --df-messenger-input-border: 1px solid rgba(17, 24, 39, 0.10);
-      --df-messenger-input-font-color: #0b1220;
-      --df-messenger-input-placeholder-font-color: rgba(17, 24, 39, 0.45);
-    }
-
-    /* Keep DF chat direction as you had */
-    df-messenger-chat {
-      direction: ltr !important;
-    }
-
-    /* Hide the floating bubble */
-    df-messenger-chat-bubble {
-      display: none !important;
-    }
-
-    /* Responsive */
-    @media (max-width: 720px) {
-      .app-header {
-        height: 84px;
-        padding: 0 16px;
-      }
-
-      .logo-img {
-        height: 54px;
-      }
-
-      .header-title {
-        font-size: 1.18rem;
-      }
-
-      .chat-container {
-        width: calc(100% - 18px);
-        margin: 12px auto 14px;
-        border-radius: 16px;
-      }
-    }
   </style>
 </head>
 
 <body>
   <header class="app-header">
     <div class="logo-container">
-      <img src="logo.png" alt="ComplyFlow Logo" class="logo-img" />
+      <div style="font-size: 24px;">🏛️</div> 
     </div>
-
     <div class="header-text">
       <div class="header-title">הדרך המהירה לעסק שלך</div>
       <div class="header-sub">ComplyFlow · עוזר רגולציה חכם</div>
     </div>
   </header>
 
-  <main class="chat-container">
-    <df-messenger location="us-central1" project-id="yuvalfrank" agent-id="b470ba36-2b1d-4f48-a334-3bcdc5162445"
-      language-code="he" expand="true">
-      <df-messenger-chat chat-title="ComplyFlow Assistant"></df-messenger-chat>
-    </df-messenger>
-  </main>
-</body>
+  <main class="chat-wrapper">
+    <div id="chat-history">
+      <div class="message bot">שלום! אני העוזר החכם של עיריית תל אביב. אפשר לספר לי על העסק, או פשוט להעלות תמונה כדי שאזהה לבד.</div>
+    </div>
+    
+    <div class="typing" id="typing-indicator">מקליד...</div>
 
+    <div id="image-preview-container">
+        <div class="preview-wrapper">
+            <img id="image-preview" src="" alt="Preview">
+            <div class="remove-img" onclick="clearImage()">×</div>
+        </div>
+    </div>
+
+    <div class="input-area">
+      <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="handleImageSelect(event)">
+      <button class="icon-btn" onclick="document.getElementById('image-upload').click()" title="העלה תמונה">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </button>
+
+      <textarea id="user-input" placeholder="כתוב הודעה..." oninput="autoResize(this)" onkeypress="handleEnter(event)"></textarea>
+      
+      <button class="send-btn" onclick="sendMessage()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </main>
+
+  <script>
+    // --- הגדרות ---
+    // הכתובת של ה-GATEWAY שיצרת ב-Cloud Run
+    const GATEWAY_URL = "https://agent-gateway-final-550357153823.us-central1.run.app/chat"; 
+    
+    let currentSessionId = localStorage.getItem('session_id') || 'sess-' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('session_id', currentSessionId);
+    
+    let selectedImageBase64 = null;
+
+    // --- פונקציות ---
+
+    function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    }
+
+    function handleEnter(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    }
+
+    function handleImageSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                selectedImageBase64 = e.target.result; // Data URL מלא
+                
+                // הצגת תצוגה מקדימה
+                document.getElementById('image-preview').src = selectedImageBase64;
+                document.getElementById('image-preview-container').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function clearImage() {
+        selectedImageBase64 = null;
+        document.getElementById('image-upload').value = "";
+        document.getElementById('image-preview-container').style.display = 'none';
+    }
+
+    function appendMessage(text, sender, imageSrc = null) {
+        const history = document.getElementById('chat-history');
+        const div = document.createElement('div');
+        div.className = `message ${sender}`;
+        
+        let content = text.replace(/\n/g, '<br>');
+        if (imageSrc) {
+            content += `<br><img src="${imageSrc}">`;
+        }
+        
+        div.innerHTML = content;
+        history.appendChild(div);
+        history.scrollTop = history.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('user-input');
+        const text = input.value.trim();
+
+        if (!text && !selectedImageBase64) return;
+
+        // הצגת הודעת המשתמש
+        appendMessage(text, 'user', selectedImageBase64);
+
+        // הכנת המידע לשליחה
+        const payload = {
+            session_id: currentSessionId,
+            message: text,
+            image_data: selectedImageBase64 // שולח את התמונה אם קיימת
+        };
+
+        // ניקוי שדות
+        input.value = '';
+        input.style.height = '24px';
+        const imageToSend = selectedImageBase64; // שומרים עותק לשליחה
+        clearImage();
+
+        // הצגת חיווי הקלדה
+        document.getElementById('typing-indicator').style.display = 'block';
+
+        try {
+            const response = await fetch(GATEWAY_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            
+            // הסתרת חיווי הקלדה
+            document.getElementById('typing-indicator').style.display = 'none';
+
+            if (data.response) {
+                appendMessage(data.response, 'bot');
+            } else {
+                appendMessage("אירעה שגיאה בקבלת התשובה.", 'bot');
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('typing-indicator').style.display = 'none';
+            appendMessage("שגיאת תקשורת עם השרת.", 'bot');
+        }
+    }
+  </script>
+</body>
 </html>
